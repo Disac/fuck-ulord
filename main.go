@@ -100,7 +100,7 @@ func Times(s, t map[string]string) map[string]float64 {
 	for addr, share := range sharesToAddr {
 		percent := share / sum
 		reward[addr] = allReward * percent
-		log.Println(addr, share, percent, reward[addr])
+		log.Printf("%d %5.3f %.4f %2.5f", addr, share, percent, reward[addr])
 	}
 	return reward
 }
