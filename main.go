@@ -57,7 +57,9 @@ func Times(s, t map[string]string) map[string]float64 {
 		_, has := sharesToAddr[address]
 		if !has {
 			sharesToAddr[address] = val
+			continue
 		}
+		sharesToAddr[address] += val
 		sum += sharesToAddr[address]
 	}
 
@@ -98,7 +100,7 @@ func Times(s, t map[string]string) map[string]float64 {
 	for addr, share := range sharesToAddr {
 		percent := share / sum
 		reward[addr] = allReward * percent
-		log.Println(addr, percent, reward[addr])
+		log.Println(addr, share, percent, reward[addr])
 	}
 	return reward
 }
