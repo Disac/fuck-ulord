@@ -45,12 +45,13 @@ func main() {
 	Go(cli, "ulord{:shares:round}Current", "ulord{:shares:times}Current")
 }
 
-func Times(round, shares map[string]string) map[string]float64 {
+func Times(s, t map[string]string) map[string]float64 {
 	timesToAddr := make(map[string]float64)
 	sharesToAddr := make(map[string]float64)
 
+	// 求total shares
 	sum := 0.0
-	for k, v := range shares {
+	for k, v := range s {
 		address := strings.Split(k, ".")[0]
 		val, _ := strconv.ParseFloat(v, 64)
 		_, has := sharesToAddr[address]
@@ -63,7 +64,7 @@ func Times(round, shares map[string]string) map[string]float64 {
 	log.Println("Total share", sum)
 
 	var times []float64
-	for k, v := range round {
+	for k, v := range t {
 		val, _ := strconv.ParseFloat(v, 64)
 		times = append(times, val)
 		address := strings.Split(k, ".")[0]
