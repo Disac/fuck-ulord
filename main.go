@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const allReward = 112.966
+const allReward = 112.966 * 18
 
 type RedisProvider struct {
 	client   *redis.Client
@@ -43,6 +43,12 @@ func main() {
 
 	log.Println("fuck2")
 	Go(cli, "ulord{:shares:round}Current", "ulord{:shares:times}Current")
+
+	//log.Println("blocksPendingConfirms")
+	//HGet(cli, "ulord:blocksPendingConfirms")
+	//
+	//log.Println("blocksPending")
+	//Get(cli, "ulord:blocksPending")
 }
 
 func Times(s, t map[string]string) map[string]float64 {
@@ -60,10 +66,13 @@ func Times(s, t map[string]string) map[string]float64 {
 			continue
 		}
 		sharesToAddr[address] += val
-		sum += sharesToAddr[address]
 	}
 
-	log.Println("Total share", sum)
+	for _, v := range sharesToAddr {
+		sum += v
+	}
+
+	log.Printf("Total share %f", sum)
 
 	var times []float64
 	for k, v := range t {
@@ -86,7 +95,7 @@ func Times(s, t map[string]string) map[string]float64 {
 	sort.Float64s(times)
 	maxTimes := times[len(times)-1]
 
-	log.Println("Max Time", maxTimes)
+	log.Printf("Max Time %f", maxTimes)
 
 	for addr, t := range timesToAddr {
 		if t < maxTimes*0.51 {
@@ -97,11 +106,14 @@ func Times(s, t map[string]string) map[string]float64 {
 
 	reward := make(map[string]float64)
 
+	totalReward := 0.0
 	for addr, share := range sharesToAddr {
 		percent := share / sum
 		reward[addr] = allReward * percent
-		log.Printf("%d %5.3f %.4f %2.5f", addr, share, percent, reward[addr])
+		totalReward += reward[addr]
+		log.Printf("%s %.8f %f %f", addr, percent, share, reward[addr])
 	}
+	log.Printf("Total reward %f, rest %f", totalReward, allReward-totalReward)
 	return reward
 }
 
@@ -119,4 +131,28 @@ func Go(cli *redis.Client, sharekey, timeskey string) {
 		return
 	}
 	Times(round, times)
+}
+
+func HGet(cli *redis.Client, key string) {
+	cmd := cli.HGetAll(key)
+	result, err := cmd.Result()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for k, v := range result {
+		log.Println(k, v)
+	}
+}
+
+func Get(cli *redis.Client, key string) {
+	var str string
+	cmd := cli.GetSet(key, str)
+	result, err := cmd.Result()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(result)
 }
