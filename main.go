@@ -38,7 +38,10 @@ func main() {
 	log.Println(re.Password, re.Addr, re.PoolSize)
 	cli := re.Provide().(*redis.Client)
 
+	log.Println("fuck1")
 	Go(cli, "ulord:shares:roundCurrent", "ulord:shares:timesCurrent")
+
+	log.Println("fuck2")
 	Go(cli, "ulord{:shares:round}Current", "ulord{:shares:times}Current")
 }
 
@@ -56,6 +59,8 @@ func Times(round, shares map[string]string) map[string]float64 {
 		}
 		sum += sharesToAddr[address]
 	}
+
+	log.Println("Total share", sum)
 
 	var times []float64
 	for k, v := range round {
@@ -78,6 +83,8 @@ func Times(round, shares map[string]string) map[string]float64 {
 	sort.Float64s(times)
 	maxTimes := times[len(times)-1]
 
+	log.Println("Max Time", maxTimes)
+
 	for addr, t := range timesToAddr {
 		if t < maxTimes*0.51 {
 			lostShare := sharesToAddr[addr] * (1 - t/maxTimes)
@@ -90,6 +97,7 @@ func Times(round, shares map[string]string) map[string]float64 {
 	for addr, share := range sharesToAddr {
 		percent := share / sum
 		reward[addr] = allReward * percent
+		log.Println(addr, percent, reward[addr])
 	}
 	return reward
 }
@@ -107,9 +115,5 @@ func Go(cli *redis.Client, sharekey, timeskey string) {
 		log.Println(err)
 		return
 	}
-	reward := Times(round, times)
-
-	for k, v := range reward {
-		log.Println(k, v)
-	}
+	Times(round, times)
 }
